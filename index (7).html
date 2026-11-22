@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Original Parfum демо</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+<style>
+[hidden]{display:none!important}
+/* Layout: plain perfume shop. White, black text, one red for sales. Header with categories + search, product grid, product page with volume picker, cart, checkout. Mobile: bottom tab bar. */
+:root{
+  --bg:#FFFFFF; --soft:#F5F5F5; --img:#F7F7F7; --fg:#1B1B1B; --muted:#777777; --line:#E5E5E5;
+  --ink:#1B1B1B; --ink-fg:#FFFFFF; --brass:#1B1B1B; --brass-soft:#EFEFEF; --sale:#D6303B; --ok:#2E7D4F;
+  --serif:"Roboto",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  --sans:"Roboto",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:14px/1.5 var(--sans);margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.in{max-width:1240px;margin:0 auto}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+h1,h2,h3{margin:0;font-weight:600;text-wrap:balance}
+.serif{font-weight:700}
+.cap{font-size:13px;color:var(--muted);font-weight:500}
+
+/* top */
+.util{border-bottom:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.util .in{display:flex;gap:22px;height:34px;align-items:center;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.util .r{margin-left:auto}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.hb{display:flex;align-items:center;gap:18px;height:72px}
+.logo{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.logo i{font-style:normal;width:44px;height:44px;border:1.5px dashed #B5B5B5;border-radius:8px;display:grid;place-items:center;font-size:10px;color:#9A9A9A;line-height:1.1;text-align:center}
+.logo b{font-size:19px;font-weight:700}
+nav.cats{display:flex;gap:2px}
+nav.cats a{padding:8px 11px;font-weight:500;border-bottom:2px solid transparent}
+nav.cats a:hover,nav.cats a.on{border-color:var(--fg)}
+.search{flex:1;min-width:0;display:flex;align-items:center;height:42px;background:var(--soft);border-radius:999px;padding:0 6px 0 16px;gap:8px}
+.search svg{width:18px;height:18px;color:var(--muted);flex:none}
+.search input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:14.5px;color:var(--fg);outline:none}
+.acts{display:flex;gap:4px}
+.act{position:relative;width:42px;height:42px;display:grid;place-items:center;border-radius:50%}
+.act:hover{background:var(--soft)}
+.act svg{width:22px;height:22px}
+.cnt{position:absolute;top:2px;right:2px;background:var(--fg);color:var(--bg);border-radius:999px;min-width:18px;height:18px;font-size:11px;display:grid;place-items:center;padding:0 5px;font-weight:600}
+.cnt[hidden]{display:none}
+@media (max-width:960px){nav.cats{display:none}}
+@media (max-width:760px){
+ .util{display:none}.hb{flex-wrap:wrap;height:auto;padding-block:10px;gap:10px}
+ .logo{flex:1}.search{order:3;flex-basis:100%}.acts .hide-m{display:none}
+}
+
+main{padding-block:20px 56px;min-height:60vh}
+.crumbs{font-size:12.5px;color:var(--muted);margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap}
+.crumbs a:hover{color:var(--fg)}
+
+/* home */
+.banners{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+.bn{border-radius:12px;padding:28px;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;min-height:150px;text-align:left}
+.bn.main{background:#F3E3E1;min-height:300px}
+.bn.a{background:#E4EAF2}.bn.b{background:#ECE9E1}
+.bn h2{font-size:clamp(22px,3.2vw,34px);line-height:1.15;font-weight:700;margin:0}
+.bn p{margin:0;color:#555;font-size:15px;max-width:40ch}
+.bn .btn{align-self:flex-start}
+.side{display:grid;gap:12px}
+.side .bn h2{font-size:20px}
+.dots{display:flex;gap:6px;margin-top:6px}.dots i{width:8px;height:8px;border-radius:50%;background:#1B1B1B;opacity:.25}.dots i:first-child{opacity:1}
+.ctas{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;padding:0 24px;border-radius:8px;background:var(--ink);color:var(--ink-fg);font-weight:500}
+.btn:hover{opacity:.88}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--fg)}
+.btn.full{width:100%}
+.btn.sm{height:38px;padding:0 14px;font-size:13.5px}
+@media (max-width:760px){.banners{grid-template-columns:1fr}.bn.main{min-height:220px;padding:22px}.side{grid-template-columns:1fr 1fr}.bn{padding:18px;min-height:120px}}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+.tile{background:var(--soft);border-radius:10px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;text-align:left}
+.tile:hover{background:#ECECEC}
+.tile b{font-size:17px;font-weight:700}
+.tile span{font-size:12.5px;color:var(--muted)}
+@media (max-width:760px){.tiles{grid-template-columns:1fr 1fr}.tile{padding:14px}.tile b{font-size:15px}}
+.blk{margin-top:40px;display:flex;flex-direction:column;gap:16px}
+.blk-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.blk-h h2{font-size:24px;font-weight:700}
+.more{font-weight:500;color:#555;white-space:nowrap}
+.more:hover{color:var(--fg)}
+.brands{display:flex;flex-wrap:wrap;gap:8px}
+.brands button{border:1px solid var(--line);border-radius:999px;padding:9px 16px;font-weight:500}
+.brands button:hover{border-color:var(--fg)}
+.perks{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:40px}
+.perk{background:var(--bg);padding:18px}
+.perk b{display:block;font-weight:600;margin-bottom:3px}
+.perk span{color:var(--muted);font-size:13px}
+@media (max-width:760px){.perks{grid-template-columns:1fr 1fr}}
+
+/* grid & card */
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px 16px}
+@media (max-width:1000px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:620px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 10px}}
+.card{display:flex;flex-direction:column;gap:6px;min-width:0}
+.pic{position:relative;display:block}
+.ph{aspect-ratio:1;max-width:100%;background:var(--img);border-radius:8px;display:grid;place-items:center;overflow:hidden}
+.ph svg{width:40%;height:auto}
+.lbls{position:absolute;top:10px;left:10px;display:flex;gap:4px;flex-wrap:wrap}
+.lbl{font-size:12px;font-weight:500;background:var(--bg);color:var(--fg);padding:3px 8px;border-radius:6px;border:1px solid var(--line)}
+.lbl.sale{border-color:transparent}
+.lbl.sale{background:var(--sale);color:#fff}
+.fav{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--fg)}
+.fav svg{width:20px;height:20px}
+.fav.on{color:var(--sale)}
+.br{font-weight:700;font-size:14px;margin-top:6px}
+.nm{font-size:13.5px;line-height:1.35;color:var(--fg)}
+.meta{font-size:12.5px;color:var(--muted)}
+.pr{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.pr b{font-size:18px;font-weight:700}
+.pr s{color:var(--muted);font-size:13px}
+.card .add{margin-top:6px;height:40px;background:var(--ink);color:var(--ink-fg);border-radius:8px;font-weight:500;font-size:14px}
+.card .add:hover{opacity:.85}
+.card .add.in{background:var(--soft);color:var(--fg)}
+
+/* catalog */
+.cat{display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;align-items:start}
+.flt{display:flex;flex-direction:column;gap:20px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 90px);max-height:calc(100vh - 110px);overflow:auto;padding-right:4px}
+.flt h4{margin:0 0 8px;font-size:15px;font-weight:700}
+.ck{display:flex;gap:9px;align-items:center;padding:4px 0;cursor:pointer}
+.ck input{accent-color:var(--fg);width:16px;height:16px;margin:0}
+.ck em{margin-left:auto;font-style:normal;color:var(--muted);font-size:12px}
+.bsearch{width:100%;height:36px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font:inherit;background:var(--bg);color:var(--fg);margin-bottom:6px}
+.blist{max-height:220px;overflow:auto}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px}
+.pill.on{background:var(--ink);color:var(--ink-fg);border-color:var(--ink)}
+.rng{display:flex;gap:8px}
+.rng input{font:inherit;width:100%;min-width:0;height:38px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
+.bar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap}
+.bar select{font:inherit;height:38px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);padding:0 10px}
+.ftg{display:none}
+.active{display:flex;gap:6px;flex-wrap:wrap}
+.active button{background:var(--soft);border-radius:999px;padding:5px 10px;font-size:12.5px}
+.empty{background:var(--soft);padding:44px 20px;text-align:center;color:var(--muted)}
+@media (max-width:860px){.cat{grid-template-columns:minmax(0,1fr)}.flt{position:static;max-height:none;display:none;border:1px solid var(--line);padding:16px}.flt.open{display:flex}.ftg{display:inline-flex}}
+
+/* product */
+.pp{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:40px;align-items:start}
+.pp .ph{aspect-ratio:1;border-radius:10px}
+.pp>.pic{position:sticky;top:calc(env(safe-area-inset-top,0px) + 90px)}
+@media (max-width:860px){.pp>.pic{position:relative;top:0}}
+.pp .ph svg{width:38%}
+.pinfo{display:flex;flex-direction:column;gap:14px;min-width:0}
+.pinfo .br{font-size:13px;margin:0}
+.pinfo h1{font-size:28px;line-height:1.2;font-weight:700}
+.vols{display:flex;gap:8px;flex-wrap:wrap}
+.vol{border:1px solid var(--line);border-radius:8px;padding:9px 14px;display:flex;flex-direction:column;align-items:flex-start;min-width:92px}
+.vol b{font-weight:600}
+.vol span{font-size:12px;color:var(--muted)}
+.vol.on{border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.big{font-size:28px;font-weight:700}
+.buyrow{display:flex;gap:10px}
+.buyrow .btn{flex:1}
+.sq{width:46px;height:46px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;flex:none}
+.sq svg{width:22px;height:22px}
+.sq.on{color:var(--sale)}
+.facts{border-top:1px solid var(--line);padding-top:14px;display:grid;gap:8px;font-size:13.5px}
+.facts div{display:flex;gap:10px}
+.facts svg{width:18px;height:18px;flex:none;color:var(--muted);margin-top:1px}
+.pyr{display:grid;gap:0;border:1px solid var(--line)}
+.pyr div{display:grid;grid-template-columns:120px 1fr;gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
+.pyr div:first-child{border-top:0}
+.pyr span{color:var(--muted);font-size:13.5px}
+.props{width:100%;border-collapse:collapse;font-size:13.5px}
+.props td{padding:8px 0;border-bottom:1px solid var(--line)}
+.props td:first-child{color:var(--muted);width:45%}
+.sect{margin-top:28px;display:flex;flex-direction:column;gap:14px}
+.sect h2{font-size:20px;font-weight:700}
+@media (max-width:860px){.pp{grid-template-columns:minmax(0,1fr);gap:20px}.pinfo h1{font-size:28px}.pyr div{grid-template-columns:96px 1fr}}
+
+/* cart */
+.cw{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:28px;align-items:start}
+.cw>*{min-width:0}
+@media (max-width:900px){.cw{grid-template-columns:minmax(0,1fr)}}
+.ln{display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:16px;padding:16px 0;border-bottom:1px solid var(--line);align-items:start}
+.ln:first-child{border-top:1px solid var(--line)}
+.ln .ph svg{width:52%}
+.ln .t{display:flex;flex-direction:column;gap:3px}
+.ln .r{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.ln .r b{font-size:16px}
+.qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;height:34px}
+.qty button{width:34px;height:32px;font-size:16px}
+.qty span{min-width:26px;text-align:center}
+.lk{color:var(--muted);font-size:12.5px;text-decoration:underline;text-underline-offset:3px}
+@media (max-width:560px){.ln{grid-template-columns:76px minmax(0,1fr)}.ln .r{grid-column:2;flex-direction:row;align-items:center;justify-content:space-between}}
+.sum{background:var(--soft);padding:20px;display:flex;flex-direction:column;gap:12px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 90px)}
+.row{display:flex;justify-content:space-between;gap:10px}
+.row span:first-child{color:var(--muted)}
+.row.t{font-size:19px;font-weight:700;border-top:1px solid var(--line);padding-top:12px}
+.row.t span:first-child{color:var(--fg)}
+.row.g span:last-child{color:var(--ok)}
+.pc{display:flex;gap:8px}
+.pc input{flex:1;min-width:0;font:inherit;height:40px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
+.pc button{padding:0 14px;border:1px solid var(--fg);border-radius:8px;font-weight:600}
+.note{font-size:12.5px;color:var(--muted)}
+.okm{font-size:12.5px;color:var(--ok)}
+
+/* checkout */
+.co{display:flex;flex-direction:column;gap:24px}
+.co h3{font-size:19px;font-weight:700;margin-bottom:12px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.f2{grid-template-columns:1fr}}
+.fi{display:flex;flex-direction:column;gap:5px}
+.fi label{font-size:12.5px;color:var(--muted)}
+.fi input{font:inherit;height:44px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:560px){.opts{grid-template-columns:1fr}}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:14px;cursor:pointer}
+.opt:has(input:checked){border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.opt input{accent-color:var(--fg);margin:2px 0 0;width:16px;height:16px;flex:none}
+.opt b{display:block;font-weight:600}
+.opt span{font-size:12.5px;color:var(--muted)}
+.opt .p{margin-left:auto;font-weight:600;white-space:nowrap}
+.err{color:var(--sale);font-size:13px;min-height:18px}
+.done{max-width:520px;margin:30px auto;display:flex;flex-direction:column;gap:14px;text-align:center;align-items:center}
+.done h1{font-size:28px;font-weight:700}
+
+/* footer, tabbar, toast */
+footer{background:var(--soft);padding-block:32px 34px;color:var(--muted);font-size:13px;margin-top:20px}
+footer .in{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:24px}
+footer b{color:var(--fg);display:block;margin-bottom:8px;font-weight:600}
+footer a{display:block;padding:2px 0}
+footer a:hover{color:var(--fg)}
+footer .demo{grid-column:1/-1;border-top:1px solid var(--line);padding-top:14px;font-size:12px}
+@media (max-width:760px){footer .in{grid-template-columns:1fr 1fr}footer .in>div:first-child{grid-column:1/-1}}
+.tabbar{display:none}
+@media (max-width:760px){
+ .tabbar{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--bg);border-top:1px solid var(--line);
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+ .tabbar a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--muted);position:relative}
+ .tabbar a.on{color:var(--fg)}
+ .tabbar svg{width:22px;height:22px}
+ .tabbar .cnt{top:-3px;right:auto;left:calc(50% + 4px)}
+ footer{padding-bottom:calc(90px + env(safe-area-inset-bottom,0px))}
+}
+.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--ink-fg);padding:11px 18px;border-radius:8px;z-index:50;font-size:13.5px;max-width:calc(100% - 32px)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="util gut"><div class="in">
+  <span>Доставка по всей России</span><span>Самовывоз из магазина</span><span>Бесплатная доставка от 10 000 ₽</span>
+  <span class="r num">+7 920 533-15-23 · <a href="https://wa.me/79205331523" target="_blank" rel="noopener" style="color:var(--fg);font-weight:600">WhatsApp</a></span>
+</div></div>
+
+<header class="top">
+  <div class="gut"><div class="in hb">
+    <a class="logo" href="#home" aria-label="На главную"><i>место<br>для лого</i><b>Original-Parfum</b></a>
+    <nav class="cats" aria-label="Разделы">
+      <a href="#catalog" data-setg="ж">Женская</a><a href="#catalog" data-setg="м">Мужская</a><a href="#catalog" data-setg="у">Для всех</a><a href="#catalog" data-setniche>Нишевая</a><a href="#catalog" data-allcat>Все бренды</a>
+    </nav>
+    <form class="search" id="sf" role="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Аромат или бренд" aria-label="Поиск"></form>
+    <div class="acts">
+      <a class="act hide-m" href="#catalog" data-favs aria-label="Избранное"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span class="cnt num" id="favCnt" hidden>0</span></a>
+      <a class="act" href="#cart" aria-label="Корзина"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span class="cnt num" id="cartCnt" hidden>0</span></a>
+    </div>
+  </div></div>
+</header>
+
+<main class="gut"><div class="in" id="view"></div></main>
+
+<footer class="gut"><div class="in">
+  <div><b style="font-size:17px">Original-Parfum</b>Оригинальная парфюмерия с доставкой по России и самовывозом.</div>
+  <div><b>Каталог</b><a href="#catalog" data-setg="ж">Женские ароматы</a><a href="#catalog" data-setg="м">Мужские ароматы</a><a href="#catalog" data-setniche>Нишевая парфюмерия</a></div>
+  <div><b>Покупателям</b><a href="#home" data-jump="perks">Доставка и оплата</a><a href="#home" data-jump="perks">Гарантия подлинности</a><a href="#home" data-jump="perks">Возврат</a></div>
+  <div><b>Связаться</b><span class="num">+7 920 533-15-23</span><a href="https://wa.me/79205331523" target="_blank" rel="noopener">Написать в WhatsApp</a></div>
+  <div class="demo">Демо-версия сайта. Цены, наличие и описания указаны для примера, заказы не оформляются. Вместо фотографий флаконов временные изображения. В рабочей версии будет весь ассортимент из вашей таблицы.</div>
+</div></footer>
+
+<nav class="tabbar" aria-label="Навигация">
+  <a href="#home" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>Главная</a>
+  <a href="#catalog" data-tab="catalog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Каталог</a>
+  <a href="#cart" data-tab="cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Корзина<span class="cnt num" id="cartCnt2" hidden>0</span></a>
+  <a href="#catalog" data-favs data-tab="fav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Избранное</a>
+</nav>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+// ---------- data ----------
+// [id, brand, name, gender, conc, price50, hue, shape, top, heart, base, tag, niche, oldPct, stock]
+const RAW=[
+ [1,'Chanel','Coco Mademoiselle','ж','EDP',13900,28,0,'апельсин, бергамот','роза, жасмин','пачули, ветивер, ваниль','Хит',0,0,1],
+ [2,'Dior','Sauvage','м','EDT',10900,205,1,'бергамот, перец','лаванда, герань','амброксан, кедр','Хит',0,0,1],
+ [3,'Maison Francis Kurkdjian','Baccarat Rouge 540','у','EDP',29900,8,3,'шафран, жасмин','амбровое дерево','еловая смола, кедр','Хит',1,0,1],
+ [4,'Tom Ford','Lost Cherry','у','EDP',24900,350,0,'вишня, горький миндаль','турецкая роза, жасмин','бобы тонка, сандал, ваниль','',1,0,1],
+ [5,'Yves Saint Laurent','Libre','ж','EDP',11900,40,2,'лаванда, мандарин','апельсиновый цвет, жасмин','ваниль, мускус, кедр','Новинка',0,0,1],
+ [6,'Giorgio Armani','Acqua di Giò','м','EDT',8900,195,1,'бергамот, лайм, нероли','морские ноты, розмарин','пачули, белый мускус','',0,15,1],
+ [7,'Lancôme','La Vie Est Belle','ж','EDP',10500,330,2,'чёрная смородина, груша','ирис, жасмин','пралине, ваниль, пачули','',0,0,1],
+ [8,'Creed','Aventus','м','EDP',32900,95,0,'ананас, бергамот, яблоко','берёза, пачули, жасмин','мускус, дубовый мох, амбра','',1,0,1],
+ [9,'Byredo','Gypsy Water','у','EDP',21900,60,1,'бергамот, лимон, можжевельник','ладан, хвоя','ваниль, сандал, амбра','Новинка',1,0,1],
+ [10,'Kilian','Love, Don\'t Be Shy','ж','EDP',27900,320,3,'нероли, бергамот, розовый перец','апельсиновый цвет, жимолость','маршмеллоу, ваниль, мускус','',1,0,0],
+ [11,'Hermès','Terre d\'Hermès','м','EDT',11500,25,1,'апельсин, грейпфрут','перец, герань','ветивер, кедр, бензоин','',0,0,1],
+ [12,'Narciso Rodriguez','For Her','ж','EDP',9900,345,2,'роза, персик','мускус, амбра','пачули, ваниль','',0,20,1],
+ [13,'Montale','Intense Cafe','у','EDP',12900,22,3,'кофе, роза','ваниль, белые цветы','амбра, мускус','',1,0,1],
+ [14,'Gucci','Bloom','ж','EDP',10900,350,0,'тубероза','жасмин самбак','ранункулюс','',0,0,1],
+ [15,'Paco Rabanne','1 Million','м','EDT',8500,45,3,'грейпфрут, мята, мандарин','роза, корица','кожа, амбра, пачули','',0,0,1],
+ [16,'Dior','J\'adore','ж','EDP',12900,48,2,'груша, дыня, бергамот','жасмин, тубероза, роза','мускус, ваниль, кедр','Хит',0,0,1],
+ [17,'Chanel','Bleu de Chanel','м','EDP',13500,215,0,'грейпфрут, лимон, мята','имбирь, жасмин, мускатный орех','ладан, ветивер, сандал','',0,0,1],
+ [18,'Yves Saint Laurent','Black Opium','ж','EDP',11200,300,0,'груша, розовый перец','кофе, жасмин','ваниль, пачули, кедр','',0,10,1],
+ [19,'Tom Ford','Tobacco Vanille','у','EDP',26900,30,0,'табачный лист, пряности','ваниль, какао, бобы тонка','сухофрукты, древесные ноты','',1,0,1],
+ [20,'Jo Malone','Wood Sage & Sea Salt','у','Cologne',9800,150,1,'амбретта','морская соль','шалфей, красные водоросли','',1,0,1],
+ [21,'Prada','Paradoxe','ж','EDP',11800,35,3,'груша, бергамот, мандарин','нероли, жасмин','амбра, мускус, ваниль','Новинка',0,0,1],
+ [22,'Guerlain','L\'Homme Idéal','м','EDT',9400,30,1,'миндаль, цитрусы','кожа, ветивер','бобы тонка, пачули','',0,0,1],
+ [23,'Byredo','Mojave Ghost','у','EDP',21900,50,1,'амбретта, сапота','фиалка, магнолия','сандал, амбра, мускус','',1,0,1],
+ [24,'Giorgio Armani','Sì','ж','EDP',10200,355,2,'чёрная смородина','роза, фрезия','ваниль, пачули, амброксан','',0,0,1]
+];
+const VF={30:.72,50:1,100:1.55};
+const round=n=>Math.round(n/100)*100-10;
+const P=RAW.map(a=>{
+ const vols=[30,50,100].map(v=>({v,price:round(a[5]*VF[v])}));
+ return {id:a[0],brand:a[1],name:a[2],g:a[3],conc:a[4],hue:a[6],shape:a[7],top:a[8],heart:a[9],base:a[10],tag:a[11],niche:!!a[12],off:a[13],stock:!!a[14],vols,pop:100-a[0]*3+(a[11]==='Хит'?60:0)};
+});
+const G={ж:'Женский',м:'Мужской',у:'Для всех'};
+const byId=id=>P.find(p=>p.id===id);
+const rub=n=>n.toLocaleString('ru-RU')+' ₽';
+const oldOf=(price,off)=>off?Math.round(price/(1-off/100)/100)*100-10:0;
+const minPrice=p=>p.vols[0].price;
+const BRANDS=[...new Set(P.map(p=>p.brand))].sort((a,b)=>a.localeCompare(b));
+
+// ---------- bottle art ----------
+function bottle(p,big){
+ return `<svg viewBox="0 0 100 120" role="img" aria-label="Фото: ${esc(p.brand)} ${esc(p.name)}" fill="none" stroke="#C9C9C9" stroke-width="2"><rect x="38" y="14" width="24" height="16" rx="3"/><rect x="44" y="30" width="12" height="8"/><rect x="24" y="38" width="52" height="68" rx="10"/><text x="50" y="76" text-anchor="middle" font-size="8" font-family="Roboto,Arial,sans-serif" fill="#AAAAAA" stroke="none">фото</text></svg>`;
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+// ---------- state ----------
+let cart={}, favs=[], promo=null, pvol={};
+const F0=()=>({sale:false,brands:new Set(),g:'',niche:false,vol:'',min:'',max:'',stock:false,sort:'pop',q:'',fav:false,bq:''});
+let F=F0();
+try{const s=JSON.parse(localStorage.getItem('op-demo')||'null');if(s){cart=s.cart||{};favs=s.favs||[];promo=s.promo||null}}catch(e){}
+const save=()=>{try{localStorage.setItem('op-demo',JSON.stringify({cart,favs,promo}))}catch(e){}};
+const V=document.getElementById('view');
+const PROMOS={'PARFUM10':.10};
+const DEL=[{id:'ru',name:'Доставка по России',hint:'СДЭК или Почта, 2–7 дней',price:400},{id:'pick',name:'Самовывоз',hint:'Из магазина после подтверждения',price:0}];
+const FREE=10000;
+const key=(id,v)=>id+'-'+v;
+const lineOf=k=>{const[id,v]=k.split('-').map(Number);const p=byId(id);return{p,v,price:p.vols.find(x=>x.v===v).price}};
+const cnt=()=>Object.values(cart).reduce((a,b)=>a+b,0);
+const sub=()=>Object.entries(cart).reduce((s,[k,q])=>s+lineOf(k).price*q,0);
+function badges(){const c=cnt();for(const id of['cartCnt','cartCnt2']){const e=document.getElementById(id);e.textContent=c;e.hidden=!c}const f=document.getElementById('favCnt');f.textContent=favs.length;f.hidden=!favs.length}
+function toast(t){const e=document.getElementById('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,1800)}
+function pl(n,a,b,c){const m=n%10,h=n%100;return m===1&&h!==11?a:m>=2&&m<=4&&(h<12||h>14)?b:c}
+const HEART='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>';
+const HEARTF='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>';
+
+// ---------- views ----------
+function card(p){
+ const fv=favs.includes(p.id), mp=minPrice(p), inC=Object.keys(cart).some(k=>k.startsWith(p.id+'-'));
+ return `<article class="card">
+  <div class="pic"><a class="ph" href="#product-${p.id}">${bottle(p)}</a>
+   <div class="lbls">${p.off?`<span class="lbl sale">−${p.off}%</span>`:''}${p.tag?`<span class="lbl">${p.tag}</span>`:''}</div>
+   <button class="fav ${fv?'on':''}" data-fav="${p.id}" aria-label="${fv?'Убрать из избранного':'В избранное'}">${fv?HEARTF:HEART}</button></div>
+  <div class="br">${esc(p.brand)}</div>
+  <a class="nm" href="#product-${p.id}">${esc(p.name)}</a>
+  <div class="meta">${G[p.g]} · ${p.conc} · ${p.vols.map(v=>v.v).join(' / ')} мл</div>
+  <div class="pr num"><b>от ${rub(mp)}</b>${p.off?`<s>${rub(oldOf(mp,p.off))}</s>`:''}</div>
+  ${p.stock?`<button class="add ${inC?'in':''}" data-quick="${p.id}">${inC?'В корзине':'В корзину · 30 мл'}</button>`:`<button class="add" data-notify="${p.id}">Узнать о поступлении</button>`}
+ </article>`;
+}
+function home(){
+ const hits=[...P].sort((a,b)=>b.pop-a.pop).slice(0,8), nw=P.filter(p=>p.tag==='Новинка'||p.off).slice(0,8);
+ V.innerHTML=`
+ <section class="banners">
+  <a class="bn main" href="#catalog" data-saleall><h2>Скидки до 20% на популярные ароматы</h2><p>Dior, Armani, Narciso Rodriguez и другие бренды</p><span class="btn">Смотреть</span><div class="dots" aria-hidden="true"><i></i><i></i><i></i></div></a>
+  <div class="side">
+   <a class="bn a" href="#catalog" data-setniche><h2>Нишевая парфюмерия</h2><p>Byredo, Kilian, Creed</p></a>
+   <a class="bn b" href="#catalog" data-setnew><h2>Новинки</h2><p>Свежие поступления</p></a>
+  </div>
+ </section>
+ <div class="tiles">
+  <button class="tile" data-setg="ж"><b>Женская парфюмерия</b><span class="num">${P.filter(p=>p.g==='ж').length}</span></button>
+  <button class="tile" data-setg="м"><b>Мужская парфюмерия</b><span class="num">${P.filter(p=>p.g==='м').length}</span></button>
+  <button class="tile" data-setg="у"><b>Ароматы для всех</b><span class="num">${P.filter(p=>p.g==='у').length}</span></button>
+  <button class="tile" data-setniche><b>Нишевая парфюмерия</b><span class="num">${P.filter(p=>p.niche).length}</span></button>
+ </div>
+ <section class="blk"><div class="blk-h"><h2>Популярное</h2><a class="more" href="#catalog" data-allcat>Смотреть все</a></div><div class="grid">${hits.map(card).join('')}</div></section>
+ <section class="blk"><div class="blk-h"><h2>Бренды</h2></div><div class="brands">${BRANDS.map(b=>`<button data-setbrand="${esc(b)}">${esc(b)}</button>`).join('')}</div></section>
+ <section class="blk"><div class="blk-h"><h2>Новинки и скидки</h2></div><div class="grid">${nw.map(card).join('')}</div></section>
+ <div class="perks" id="perks">
+  <div class="perk"><b>Оригинальная продукция</b><span>Работаем с официальными поставщиками</span></div>
+  <div class="perk"><b>Доставка по России</b><span>СДЭК и Почтой. Бесплатно от ${rub(FREE)}</span></div>
+  <div class="perk"><b>Оплата на сайте</b><span>Картой или по СБП при оформлении заказа</span></div>
+  <div class="perk"><b>Самовывоз</b><span>Заберите заказ в магазине после подтверждения</span></div>
+ </div>`;
+}
+function filtered(){
+ let l=P.filter(p=>(!F.sale||p.off)&&(!F.brands.size||F.brands.has(p.brand))&&(!F.g||p.g===F.g)&&(!F.niche||p.niche)&&(!F.stock||p.stock)&&(!F.fav||favs.includes(p.id))
+  &&(!F.vol||p.vols.some(v=>v.v===+F.vol))&&(F.min===''||minPrice(p)>=+F.min)&&(F.max===''||minPrice(p)<=+F.max)
+  &&(!F.q||(p.brand+' '+p.name).toLowerCase().includes(F.q.toLowerCase())));
+ if(F.sort==='pop')l.sort((a,b)=>b.pop-a.pop);
+ if(F.sort==='cheap')l.sort((a,b)=>minPrice(a)-minPrice(b));
+ if(F.sort==='exp')l.sort((a,b)=>minPrice(b)-minPrice(a));
+ if(F.sort==='new')l.sort((a,b)=>(b.tag==='Новинка')-(a.tag==='Новинка'));
+ return l;
+}
+function title(){if(F.fav)return 'Избранное';if(F.sale)return 'Скидки';if(F.brands.size===1)return [...F.brands][0];if(F.niche)return 'Нишевая парфюмерия';if(F.g)return {ж:'Женские ароматы',м:'Мужские ароматы',у:'Ароматы для всех'}[F.g];if(F.q)return 'Результаты поиска';return 'Вся парфюмерия'}
+function catalog(){
+ const l=filtered(), open=V.querySelector('.flt')?.classList.contains('open');
+ const chips=[F.sale?['sale','Со скидкой']:null,...[...F.brands].map(b=>[`b:${b}`,b]),F.g?['g',G[F.g]]:null,F.niche?['n','Нишевая']:null,F.vol?['v',F.vol+' мл']:null,F.stock?['s','В наличии']:null,F.q?['q','«'+F.q+'»']:null].filter(Boolean);
+ V.innerHTML=`
+ <div class="crumbs"><a href="#home">Главная</a>/<span>Каталог</span></div>
+ <div class="blk-h" style="margin-bottom:16px"><h1 style="font-size:28px">${esc(title())}</h1></div>
+ <div class="cat">
+  <aside class="flt ${open?'open':''}" aria-label="Фильтры">
+   <div><h4>Для кого</h4><div class="pills">${[['','Все'],['ж','Женские'],['м','Мужские'],['у','Для всех']].map(([k,t])=>`<button class="pill ${F.g===k?'on':''}" data-fg="${k}">${t}</button>`).join('')}</div></div>
+   <div><h4>Бренд</h4><input class="bsearch" id="bq" placeholder="Найти бренд" value="${esc(F.bq)}" aria-label="Найти бренд"><div class="blist">${BRANDS.filter(b=>b.toLowerCase().includes(F.bq.toLowerCase())).map((b,i)=>`<label class="ck"><input type="checkbox" id="fb_${i}" data-fb="${esc(b)}" ${F.brands.has(b)?'checked':''}>${esc(b)}<em class="num">${P.filter(p=>p.brand===b).length}</em></label>`).join('')}</div></div>
+   <div><h4>Объём</h4><div class="pills">${['30','50','100'].map(v=>`<button class="pill ${F.vol===v?'on':''}" data-fv="${v}">${v} мл</button>`).join('')}</div></div>
+   <div><h4>Цена, ₽</h4><div class="rng"><input id="fmin" inputmode="numeric" placeholder="от" value="${F.min}" aria-label="Цена от"><input id="fmax" inputmode="numeric" placeholder="до" value="${F.max}" aria-label="Цена до"></div></div>
+   <label class="ck"><input type="checkbox" id="fnc" ${F.niche?'checked':''}>Только нишевая</label>
+   <label class="ck"><input type="checkbox" id="fst" ${F.stock?'checked':''}>Только в наличии</label>
+   <button class="btn ghost sm" id="frs">Сбросить фильтры</button>
+  </aside>
+  <div style="min-width:0">
+   <div class="bar">
+    <span class="note num">${l.length} ${pl(l.length,'аромат','аромата','ароматов')} <span style="opacity:.8">· в демо 24, в рабочей версии весь ассортимент</span></span>
+    <div style="display:flex;gap:8px"><button class="btn ghost sm ftg" id="ftg">Фильтры</button>
+    <select id="fsort" aria-label="Сортировка"><option value="pop">Популярные</option><option value="new">Сначала новинки</option><option value="cheap">Сначала дешевле</option><option value="exp">Сначала дороже</option></select></div>
+   </div>
+   ${chips.length?`<div class="active" style="margin-bottom:16px">${chips.map(([k,t])=>`<button data-rmf="${esc(k)}">${esc(t)} ✕</button>`).join('')}</div>`:''}
+   ${l.length?`<div class="grid">${l.map(card).join('')}</div>`:`<div class="empty">${F.fav?'В избранном пока пусто. Нажмите на сердечко у аромата, чтобы сохранить его.':'По этим фильтрам ничего нет. Измените фильтры или напишите нам в WhatsApp, подберём похожий аромат.'}</div>`}
+  </div>
+ </div>`;
+ document.getElementById('fsort').value=F.sort;
+}
+function product(id){
+ const p=byId(id); if(!p){location.hash='catalog';return}
+ const v=pvol[id]||50, cur=p.vols.find(x=>x.v===v), fv=favs.includes(p.id), inC=cart[key(id,v)];
+ const same=P.filter(x=>x.id!==p.id&&(x.g===p.g||x.brand===p.brand)).slice(0,4);
+ V.innerHTML=`
+ <div class="crumbs"><a href="#home">Главная</a>/<a href="#catalog" data-setg="${p.g}">${{ж:'Женские',м:'Мужские',у:'Для всех'}[p.g]}</a>/<a href="#catalog" data-setbrand="${esc(p.brand)}">${esc(p.brand)}</a></div>
+ <div class="pp">
+  <div class="pic"><div class="ph">${bottle(p,true)}</div><div class="lbls">${p.off?`<span class="lbl sale">−${p.off}%</span>`:''}${p.tag?`<span class="lbl">${p.tag}</span>`:''}</div></div>
+  <div class="pinfo">
+   <a class="br" href="#catalog" data-setbrand="${esc(p.brand)}">${esc(p.brand)}</a>
+   <h1>${esc(p.name)}</h1>
+   <div class="meta">${G[p.g]} · ${p.conc==='EDP'?'Парфюмерная вода':p.conc==='EDT'?'Туалетная вода':'Одеколон'}${p.niche?' · Нишевая парфюмерия':''}</div>
+   <div><div class="cap" style="margin-bottom:8px">Объём</div><div class="vols">${p.vols.map(x=>`<button class="vol ${x.v===v?'on':''}" data-vol="${p.id}:${x.v}" aria-pressed="${x.v===v}"><b>${x.v} мл</b><span class="num">${rub(x.price)}</span></button>`).join('')}</div></div>
+   <div class="pr num"><span class="big">${rub(cur.price)}</span>${p.off?`<s>${rub(oldOf(cur.price,p.off))}</s>`:''}</div>
+   <div class="buyrow">${p.stock?`<button class="btn" data-addv="${p.id}:${v}">${inC?'В корзине · '+inC+' шт.':'Добавить в корзину'}</button>`:`<button class="btn" data-notify="${p.id}">Узнать о поступлении</button>`}
+    <button class="sq ${fv?'on':''}" data-fav="${p.id}" aria-label="${fv?'Убрать из избранного':'В избранное'}">${fv?HEARTF:HEART}</button></div>
+   <div class="facts">
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Оригинал. Гарантия подлинности на каждый флакон</span></div>
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg><span>Доставка по России от ${rub(DEL[0].price)}, бесплатно от ${rub(FREE)}. Самовывоз из магазина</span></div>
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/></svg><span><a href="https://wa.me/79205331523?text=${encodeURIComponent('Здравствуйте! Вопрос по аромату: '+p.brand+' '+p.name)}" target="_blank" rel="noopener" style="text-decoration:underline;text-underline-offset:3px">Спросить об аромате в WhatsApp</a></span></div>
+   </div>
+ <section class="sect" style="margin-top:10px"><h2>Ноты аромата</h2>
+  <div class="pyr"><div><span>Верхние ноты</span><b>${esc(p.top)}</b></div><div><span>Ноты сердца</span><b>${esc(p.heart)}</b></div><div><span>Базовые ноты</span><b>${esc(p.base)}</b></div></div>
+ </section>
+ <section class="sect"><h2>Характеристики</h2>
+  <table class="props"><tbody><tr><td>Бренд</td><td>${esc(p.brand)}</td></tr><tr><td>Для кого</td><td>${G[p.g]}</td></tr><tr><td>Тип</td><td>${p.conc}</td></tr><tr><td>Объёмы</td><td class="num">${p.vols.map(x=>x.v).join(', ')} мл</td></tr><tr><td>Наличие</td><td>${p.stock?'В наличии':'Нет в наличии'}</td></tr></tbody></table>
+ </section>
+  </div>
+ </div>
+ ${same.length?`<section class="blk"><div class="blk-h"><h2>Вам может понравиться</h2></div><div class="grid">${same.map(card).join('')}</div></section>`:''}`;
+}
+function totals(d){const s=sub(),disc=promo?Math.round(s*PROMOS[promo]):0;const dc=d?((s-disc)>=FREE?0:d.price):null;return{s,disc,dc,total:s-disc+(dc||0)}}
+function summary(d,btn){
+ const t=totals(d);
+ return `<aside class="sum num">
+  <div class="row"><span>Товары, ${cnt()} шт.</span><span>${rub(t.s)}</span></div>
+  ${t.disc?`<div class="row g"><span>Промокод ${promo}</span><span>−${rub(t.disc)}</span></div>`:''}
+  <div class="row"><span>Доставка</span><span>${d?(t.dc?rub(t.dc):'бесплатно'):'на следующем шаге'}</span></div>
+  <div class="row t"><span>Итого</span><span>${rub(t.total)}</span></div>
+  ${btn}
+  ${!d?`<div class="pc"><input id="pin" placeholder="Промокод" aria-label="Промокод" value="${promo||''}"><button id="pbtn">Применить</button></div><div class="note" id="pmsg">${promo?'<span class="okm">Промокод применён</span>':'В демо работает промокод PARFUM10'}</div>`:''}
+  ${t.s-t.disc<FREE?`<div class="note">До бесплатной доставки ${rub(FREE-(t.s-t.disc))}</div>`:''}
+ </aside>`;
+}
+function cartV(){
+ const ks=Object.keys(cart);
+ if(!ks.length){V.innerHTML=`<div class="done"><h1>Корзина пуста</h1><p class="note">Выберите аромат в каталоге.</p><a class="btn" href="#catalog" data-allcat>Перейти в каталог</a></div>`;return}
+ V.innerHTML=`<h1 style="font-size:28px;margin-bottom:18px">Корзина</h1>
+ <div class="cw"><div>${ks.map(k=>{const{p,v,price}=lineOf(k);return `
+  <div class="ln"><a class="ph" href="#product-${p.id}">${bottle(p)}</a>
+   <div class="t"><span class="br" style="margin:0">${esc(p.brand)}</span><a href="#product-${p.id}">${esc(p.name)}</a><span class="note num">${p.conc} · ${v} мл · ${rub(price)}</span><div><button class="lk" data-rm="${k}">Удалить</button></div></div>
+   <div class="r num"><b>${rub(price*cart[k])}</b><div class="qty"><button data-dec="${k}" aria-label="Меньше">−</button><span>${cart[k]}</span><button data-inc="${k}" aria-label="Больше">+</button></div></div>
+  </div>`}).join('')}</div>
+  ${summary(null,'<a class="btn full" href="#checkout">Оформить заказ</a>')}</div>`;
+}
+function checkout(){
+ if(!cnt()){location.hash='cart';return}
+ const sel=checkout.d||'ru', d=DEL.find(x=>x.id===sel), free=sub()-(promo?Math.round(sub()*PROMOS[promo]):0)>=FREE;
+ V.innerHTML=`<h1 style="font-size:28px;margin-bottom:18px">Оформление заказа</h1>
+ <div class="cw"><form class="co" id="co" novalidate>
+  <div><h3>Получатель</h3><div class="f2"><div class="fi"><label for="cn">Имя</label><input id="cn" autocomplete="name"></div><div class="fi"><label for="cp">Телефон</label><input id="cp" inputmode="tel" autocomplete="tel" placeholder="+7"></div></div></div>
+  <div><h3>Получение</h3><div class="opts">${DEL.map(x=>`<label class="opt"><input type="radio" name="dv" id="d_${x.id}" value="${x.id}" ${x.id===sel?'checked':''}><div><b>${x.name}</b><span>${x.hint}</span></div><span class="p num">${x.price&&!free?rub(x.price):'бесплатно'}</span></label>`).join('')}</div>
+   ${sel==='ru'?`<div class="fi" style="margin-top:12px"><label for="cc">Город и адрес</label><input id="cc" placeholder="Город, улица, дом или пункт выдачи"></div>`:''}</div>
+  <div><h3>Оплата</h3><div class="opts">
+   <label class="opt"><input type="radio" name="pay" id="p1" value="Картой на сайте" checked><div><b>Картой на сайте</b><span>МИР, Visa, Mastercard</span></div></label>
+   <label class="opt"><input type="radio" name="pay" id="p2" value="СБП"><div><b>СБП</b><span>По QR-коду в приложении банка</span></div></label>
+   ${sel==='pick'?`<label class="opt"><input type="radio" name="pay" id="p3" value="При получении"><div><b>При получении</b><span>Наличными или картой в магазине</span></div></label>`:''}
+  </div></div>
+  <div class="err" id="er" aria-live="polite"></div>
+ </form>
+ ${summary(d,'<button class="btn full" form="co" type="submit">Подтвердить заказ</button><div class="note">В демо оплата не проводится</div>')}</div>`;
+}
+function doneV(){
+ const o=doneV.o; if(!o){location.hash='home';return}
+ V.innerHTML=`<div class="done"><h1>Заказ № <span class="num">${o.n}</span> оформлен</h1><p class="note" id="dt"></p>
+  <table class="props num" style="text-align:left"><tbody><tr><td>Сумма</td><td>${rub(o.total)}</td></tr><tr><td>Получение</td><td>${o.d}</td></tr><tr><td>Оплата</td><td>${o.pay}</td></tr></tbody></table>
+  <p class="note">Демо: так покупатель видит подтверждение. В рабочей версии заказ сразу приходит вам в Telegram.</p>
+  <a class="btn" href="#catalog" data-allcat>Продолжить покупки</a></div>`;
+ document.getElementById('dt').textContent=(o.name?o.name+', м':'М')+'ы свяжемся с вами в течение 15 минут, чтобы подтвердить заказ.';
+}
+
+// ---------- routing & events ----------
+function route(){
+ const h=location.hash.slice(1)||'home';
+ document.querySelectorAll('[data-tab]').forEach(a=>a.classList.toggle('on',a.dataset.tab===(h==='catalog'&&F.fav?'fav':h)||(h.startsWith('product')&&a.dataset.tab==='catalog')));
+ document.querySelectorAll('nav.cats a').forEach(a=>a.classList.toggle('on',h==='catalog'&&!F.fav&&((a.dataset.setg&&a.dataset.setg===F.g&&!F.niche)||('setniche' in a.dataset&&F.niche))));
+ if(h.startsWith('product-'))product(+h.slice(8)); else ({home,catalog,cart:cartV,checkout,done:doneV}[h]||home)();
+ badges(); if(!route.keep)scrollTo(0,0); route.keep=false;
+ if(route.jump){const el=document.getElementById(route.jump);route.jump=null;if(el)el.scrollIntoView()}
+}
+addEventListener('hashchange',route);
+const go=()=>{if(location.hash==='#catalog')route();else location.hash='catalog'};
+const rerender=()=>{route.keep=true;const y=scrollY;route();scrollTo(0,y)};
+
+document.addEventListener('click',e=>{
+ const t=e.target.closest('button,a'); if(!t)return; const d=t.dataset;
+ if('allcat' in d){F=F0();if(t.getAttribute('href')==='#catalog'){e.preventDefault();go()}return}
+ if('setg' in d){e.preventDefault();F=F0();F.g=d.setg;go();return}
+ if('setniche' in d){e.preventDefault();F=F0();F.niche=true;go();return}
+ if('setnew' in d){e.preventDefault();F=F0();F.sort='new';go();return}
+ if('saleall' in d){e.preventDefault();F=F0();F.sale=true;go();return}
+ if(d.setbrand){e.preventDefault();F=F0();F.brands=new Set([d.setbrand]);go();return}
+ if('favs' in d){e.preventDefault();F=F0();F.fav=true;go();return}
+ if(d.jump){e.preventDefault();route.jump=d.jump;if((location.hash||'#home')==='#home'){const el=document.getElementById(d.jump);if(el)el.scrollIntoView()}else location.hash='home';return}
+ if(d.fav){const id=+d.fav;favs=favs.includes(id)?favs.filter(x=>x!==id):[...favs,id];save();toast(favs.includes(id)?'Добавлено в избранное':'Убрано из избранного');rerender();return}
+ if(d.quick){const p=byId(+d.quick),k=key(p.id,p.vols[0].v);if(cart[k]){location.hash='cart';return}cart[k]=1;save();toast('Добавлено в корзину: 30 мл');rerender();return}
+ if(d.notify){toast('Сообщим, когда аромат появится');return}
+ if(d.vol){const[id,v]=d.vol.split(':').map(Number);pvol[id]=v;rerender();return}
+ if(d.addv){const[id,v]=d.addv.split(':').map(Number);const k=key(id,v);cart[k]=(cart[k]||0)+1;save();toast('Добавлено в корзину');rerender();return}
+ if(d.inc){cart[d.inc]++;save();rerender();return}
+ if(d.dec){if(--cart[d.dec]<=0)delete cart[d.dec];save();rerender();return}
+ if(d.rm){delete cart[d.rm];save();rerender();return}
+ if('fg' in d){F.g=d.fg;F.fav=false;rerender();return}
+ if(d.fv){F.vol=F.vol===d.fv?'':d.fv;rerender();return}
+ if(d.rmf){const k=d.rmf;if(k==='sale')F.sale=false;else if(k.startsWith('b:'))F.brands.delete(k.slice(2));else if(k==='g')F.g='';else if(k==='n')F.niche=false;else if(k==='v')F.vol='';else if(k==='s')F.stock=false;else if(k==='q'){F.q='';document.getElementById('q').value=''}rerender();return}
+ if(t.id==='ftg'){document.querySelector('.flt').classList.toggle('open');return}
+ if(t.id==='frs'){F=F0();document.getElementById('q').value='';rerender();return}
+ if(t.id==='pbtn'){const v=document.getElementById('pin').value.trim().toUpperCase();
+  if(PROMOS[v]){promo=v;save();rerender();toast('Промокод применён')}else{promo=null;save();rerender();document.getElementById('pmsg').textContent='Такого промокода нет. В демо работает PARFUM10'}return}
+});
+document.addEventListener('change',e=>{
+ const t=e.target;
+ if(t.dataset.fb){t.checked?F.brands.add(t.dataset.fb):F.brands.delete(t.dataset.fb);rerender();return}
+ if(t.id==='fst'){F.stock=t.checked;rerender();return}
+ if(t.id==='fnc'){F.niche=t.checked;rerender();return}
+ if(t.id==='fmin'||t.id==='fmax'){F[t.id==='fmin'?'min':'max']=t.value.replace(/\D/g,'');rerender();return}
+ if(t.id==='fsort'){F.sort=t.value;rerender();return}
+ if(t.name==='dv'){checkout.d=t.value;rerender()}
+});
+document.addEventListener('input',e=>{
+ if(e.target.id==='bq'){F.bq=e.target.value;const pos=e.target.selectionStart;rerender();const n=document.getElementById('bq');n.focus();n.setSelectionRange(pos,pos)}
+});
+document.getElementById('sf').addEventListener('submit',e=>{e.preventDefault();const q=document.getElementById('q').value.trim();F=F0();F.q=q;go()});
+document.addEventListener('submit',e=>{
+ if(e.target.id!=='co')return;e.preventDefault();
+ const name=document.getElementById('cn').value.trim(),ph=document.getElementById('cp').value.trim(),cc=document.getElementById('cc');
+ if(!ph||(cc&&!cc.value.trim())){document.getElementById('er').textContent=cc?'Укажите телефон и адрес доставки, чтобы мы могли отправить заказ.':'Укажите телефон, чтобы мы могли подтвердить заказ.';return}
+ const d=DEL.find(x=>x.id===(checkout.d||'ru')),t=totals(d);
+ doneV.o={n:String(10000+Math.floor(Math.random()*90000)),name,total:t.total,d:d.name,pay:document.querySelector('input[name=pay]:checked').value};
+ cart={};promo=null;save();location.hash='done';
+});
+route();
+</script>
+
+</html>
